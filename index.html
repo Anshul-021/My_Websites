@@ -796,7 +796,7 @@
       if (!city) return;
 
       if (window.location.hostname.endsWith(".github.io")) {
-        setMessage("Weather search is ready on the Vercel version. Open that app link to look up a city.", true);
+        setMessage("Live weather needs the Vercel deployment and its private WEATHERAPI_KEY setting. See the repository README to finish setup.", true);
         return;
       }
 
