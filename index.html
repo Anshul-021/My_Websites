@@ -401,8 +401,9 @@
     .app { width: min(100%, 1120px); margin: 0 auto; }
     .eyebrow { color: #d9e8f5; }
     .eyebrow-mark { background: #9ee7c0; }
-    h1 { color: white; font-size: clamp(38px, 7vw, 60px); text-shadow: 0 4px 25px rgba(0,0,0,.2); }
-    .subtitle { margin-bottom: 28px; color: rgba(244,249,255,.82); font-size: 16px; }
+    h1 { color: white; font-size: clamp(40px, 7.5vw, 64px); text-shadow: 0 4px 25px rgba(0,0,0,.2); }
+    .subtitle { margin-bottom: 24px; color: rgba(244,249,255,.9); font-size: 17px; font-weight: 600; }
+    .weather-joke { max-width: 620px; margin: -16px auto 30px; color: rgba(244,249,255,.82); text-align: center; font-size: 14px; line-height: 1.5; font-style: italic; }
     .search { border-color: rgba(255,255,255,.44); background: rgba(248,251,255,.94); }
     .message { color: rgba(255,255,255,.84); }
     .message.error { color: #ffe2df; }
@@ -468,7 +469,8 @@
     }
     @media (max-width: 520px) {
       body { padding: 26px 13px 34px; }
-      .subtitle { margin-bottom: 23px; }
+      .subtitle { margin-bottom: 20px; }
+      .weather-joke { margin: -12px auto 23px; font-size: 13px; }
       .weather-card { border-radius: 24px; }
       .weather-main { min-height: 310px; padding: 24px 18px; }
       .location-name { font-size: 23px; }
@@ -504,7 +506,8 @@
   <main class="app">
     <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span> Local forecast</p>
     <h1>Anshul's Weather Machine!</h1>
-    <p class="subtitle">Forecast: 100% chance of checking the weather again in five minutes.</p>
+    <p class="subtitle">Weather, at a Glance.</p>
+    <p class="weather-joke" id="weather-joke" aria-live="polite"></p>
 
     <form class="search" id="search-form" role="search">
       <svg class="search-icon" aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -584,6 +587,41 @@
     const insightGrid = document.querySelector("#insight-grid");
     let latestWeather = null;
     let backdropRequest = 0;
+
+    function showWeatherJoke() {
+      const jokes = [
+        "I tried to catch some fog yesterday. I mist.",
+        "Why did the cloud stay home? It felt under the weather.",
+        "The wind told a joke. It blew everyone away.",
+        "What does a cloud wear under its raincoat? Thunderwear.",
+        "Why did the sun go to school? To get a little brighter.",
+        "Forecast: a 100% chance of checking the weather again in five minutes.",
+        "Rain is just confetti with commitment issues.",
+        "Clouds have great timing—they always know when to make an entrance."
+      ];
+      let seen = [];
+      try {
+        seen = JSON.parse(localStorage.getItem("weather-jokes-seen") || "[]");
+        if (!Array.isArray(seen)) seen = [];
+      } catch {
+        seen = [];
+      }
+      let choices = jokes.filter(joke => !seen.includes(joke));
+      if (!choices.length) {
+        seen = [];
+        choices = jokes.filter(joke => joke !== localStorage.getItem("weather-joke-last"));
+      }
+      const joke = choices[Math.floor(Math.random() * choices.length)];
+      document.querySelector("#weather-joke").textContent = joke;
+      try {
+        localStorage.setItem("weather-jokes-seen", JSON.stringify([...seen, joke]));
+        localStorage.setItem("weather-joke-last", joke);
+      } catch {
+        // The joke still changes when storage is unavailable; only the no-repeat cycle is lost.
+      }
+    }
+
+    showWeatherJoke();
 
     function setMessage(text, isError = false) {
       message.textContent = text;
