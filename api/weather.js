@@ -45,9 +45,31 @@ module.exports = async function handler(req, res) {
     }
 
     if (!upstream.ok) {
+      const providerErrorCode = data?.error?.code;
+
       if (upstream.status === 400) {
         return res.status(404).json({
           error: { message: "City not found. Check the spelling and try again." }
+        });
+      }
+      if (upstream.status === 401 || providerErrorCode === 1002 || providerErrorCode === 2006) {
+        return res.status(502).json({
+          error: { message: "WeatherAPI rejected the key. Replace the WEATHERAPI_KEY value in Vercel with your current WeatherAPI key, then redeploy." }
+        });
+      }
+      if (upstream.status === 403 && providerErrorCode === 2007) {
+        return res.status(503).json({
+          error: { message: "The WeatherAPI monthly request quota has been reached. Check your WeatherAPI account." }
+        });
+      }
+      if (upstream.status === 403 && providerErrorCode === 2008) {
+        return res.status(503).json({
+          error: { message: "This WeatherAPI key is disabled. Create or enable a key in your WeatherAPI account, then update Vercel and redeploy." }
+        });
+      }
+      if (upstream.status === 403 && providerErrorCode === 2009) {
+        return res.status(503).json({
+          error: { message: "This WeatherAPI plan does not allow the requested forecast. Check the plan features in your WeatherAPI account." }
         });
       }
       if (upstream.status === 429) {
@@ -56,7 +78,7 @@ module.exports = async function handler(req, res) {
         });
       }
       return res.status(502).json({
-        error: { message: "The weather provider could not complete the request. Check the WEATHERAPI_KEY setting." }
+        error: { message: "WeatherAPI is temporarily unavailable. Please try again shortly." }
       });
     }
 
