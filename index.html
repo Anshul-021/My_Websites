@@ -574,8 +574,6 @@
   </main>
 
   <script>
-    // Add your WeatherAPI key from https://www.weatherapi.com/ here.
-    const API_KEY = "YOUR_WEATHERAPI_KEY";
     const form = document.querySelector("#search-form");
     const cityInput = document.querySelector("#city-input");
     const button = document.querySelector("#search-button");
@@ -797,8 +795,8 @@
       const city = cityInput.value.trim();
       if (!city) return;
 
-      if (API_KEY === "YOUR_WEATHERAPI_KEY") {
-        setMessage("Add your WeatherAPI key in the script to enable live weather.", true);
+      if (window.location.hostname.endsWith(".github.io")) {
+        setMessage("Weather search is ready on the Vercel version. Open that app link to look up a city.", true);
         return;
       }
 
@@ -806,8 +804,8 @@
       button.textContent = "Searching…";
       setMessage(`Looking up ${city}…`);
       try {
-        const url = new URL("https://api.weatherapi.com/v1/forecast.json");
-        url.search = new URLSearchParams({ key: API_KEY, q: city, aqi: "no", days: "3" });
+        const url = new URL("/api/weather", window.location.origin);
+        url.searchParams.set("q", city);
         const response = await fetch(url);
         const data = await response.json();
         if (!response.ok) throw new Error(data.error?.message || "Could not find weather for that city.");
